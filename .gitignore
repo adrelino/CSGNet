@@ -1,0 +1,6 @@
+data
+trained_models
+*__pycache__*
+log*
+*tar.gz
+.idea

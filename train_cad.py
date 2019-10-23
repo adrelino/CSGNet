@@ -7,7 +7,7 @@ import numpy as np
 import torch
 import torch.optim as optim
 import sys
-import read_config
+from src.utils import read_config
 from tensorboard_logger import configure, log_value
 from torch.autograd.variable import Variable
 from src.Models.models import ImitateJoint

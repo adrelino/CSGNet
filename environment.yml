@@ -17,4 +17,3 @@ dependencies:
   - pillow
   - configobj
   - argparse=1.4
-  - json

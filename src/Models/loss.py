@@ -4,7 +4,7 @@ from torch.autograd import Variable
 
 nllloss = nn.NLLLoss()
 
-def losses_joint(out, labels: torch._TensorBase, time_steps: int):
+def losses_joint(out, labels: torch._C._TensorBase, time_steps: int):
     """
     Defines loss
     :param out: output from the network
