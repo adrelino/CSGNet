@@ -84,14 +84,8 @@ class ImitateJoint(nn.Module):
             batch_first=False)
 
         # adapt logsoftmax and softmax for different versions of pytorch
-        self.pytorch_version = torch.__version__[2]
-        if self.pytorch_version == "1":
-            self.logsoftmax = nn.LogSoftmax()
-            self.softmax = nn.Softmax()
-
-        elif self.pytorch_version == "3":
-            self.logsoftmax = nn.LogSoftmax(1)
-            self.softmax = nn.Softmax(1)
+        self.logsoftmax = nn.LogSoftmax(1)
+        self.softmax = nn.Softmax(1)
         self.dense_fc_1 = nn.Linear(
             in_features=self.hd_sz, out_features=self.hd_sz)
         self.dense_output = nn.Linear(
@@ -175,11 +169,7 @@ class ImitateJoint(nn.Module):
                     sample = torch.multinomial(output_probs, 1)
                 else:
                     # This is during testing
-                    if self.pytorch_version == "1":
-                        sample = torch.max(output_probs, 1)[1]
-                    elif self.pytorch_version == "3":
-                        sample = torch.max(output_probs, 1)[1].view(
-                            batch_size, 1)
+                    sample = torch.max(output_probs, 1)[1].view(batch_size, 1)
 
                 # Stopping the gradient to flow backward from samples
                 sample = sample.detach()
@@ -220,10 +210,7 @@ class ImitateJoint(nn.Module):
                 h, _ = self.rnn(input, h)
                 hd = self.relu(self.dense_fc_1(self.drop(h[0])))
                 output = self.logsoftmax(self.dense_output(self.drop(hd)))
-                if self.pytorch_version == "1":
-                    next_input_op = torch.max(output, 1)[1]
-                elif self.pytorch_version == "3":
-                    next_input_op = torch.max(output, 1)[1].view(batch_size, 1)
+                next_input_op = torch.max(output, 1)[1].view(batch_size, 1)
                 arr = Variable(
                     torch.zeros(batch_size, self.num_draws + 1).scatter_(
                         1, next_input_op.data.cpu(), 1.0)).cuda()
@@ -349,7 +336,6 @@ class ParseModelOutput:
         self.Parser = Parser()
         self.sim = SimulateStack(self.stack_size, self.canvas_shape)
         self.unique_draws = unique_draws
-        self.pytorch_version = torch.__version__[2]
 
     def get_final_canvas(self,
                          outputs: List,
@@ -376,15 +362,9 @@ class ParseModelOutput:
             torch.max(outputs[i], 1)[1].data.cpu().numpy()
             for i in range(self.steps)
         ]
-
-        if self.pytorch_version == "1":
-            for j in range(batch_size):
-                for i in range(self.steps):
-                    expressions[j] += self.unique_draws[labels[i][j, 0]]
-        elif self.pytorch_version == "3":
-            for j in range(batch_size):
-                for i in range(self.steps):
-                    expressions[j] += self.unique_draws[labels[i][j]]
+        for j in range(batch_size):
+            for i in range(self.steps):
+                expressions[j] += self.unique_draws[labels[i][j]]
 
         # Remove the stop symbol and later part of the expression
         for index, exp in enumerate(expressions):

@@ -105,7 +105,7 @@ for jit in [True, False]:
             one_hot_labels = prepare_input_op(labels,
                                               len(generator.unique_draw))
             one_hot_labels = Variable(torch.from_numpy(one_hot_labels)).cuda()
-            data = Variable(torch.from_numpy(data_), volatile=True).cuda()
+            data = Variable(torch.from_numpy(data_)).cuda()
             labels = Variable(torch.from_numpy(labels)).cuda()
             test_output = imitate_net.test([data, one_hot_labels, max_len])
             pred_images, correct_prog, pred_prog = parser.get_final_canvas(
