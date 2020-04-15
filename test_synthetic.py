@@ -38,9 +38,13 @@ dataset_sizes = {
     13: [370000, 1000 * proportion]
 }
 
-generator = MixedGenerateData(data_labels_paths=data_labels_paths,
+generator = MixedGenerateData(data_labels_paths={3:data_labels_paths[3], 5:data_labels_paths[5]},
                               batch_size=config.batch_size,
                               canvas_shape=config.canvas_shape)
+
+assert len(generator.unique_draw) == 400
+data_labels_paths = {3:data_labels_paths[3]}
+dataset_sizes = {3:dataset_sizes[3]}
 
 imitate_net = ImitateJoint(hd_sz=config.hidden_size,
                            input_size=config.input_size,
@@ -82,7 +86,9 @@ metrics = {}
 programs_tar = {}
 programs_pred = {}
 
-for jit in [True, False]:
+#for jit in [False]:
+jit = False
+with torch.no_grad():
     total_CD = 0
     test_gen_objs = {}
     programs_tar[jit] = []
@@ -100,7 +106,8 @@ for jit in [True, False]:
 
     for k in dataset_sizes.keys():
         test_batch_size = config.batch_size
-        for _ in range(dataset_sizes[k][1] // test_batch_size):
+        for i in range(dataset_sizes[k][1] // test_batch_size):
+            print(k, i, dataset_sizes[k][1] // test_batch_size)
             data_, labels = next(test_gen_objs[k])
             one_hot_labels = prepare_input_op(labels,
                                               len(generator.unique_draw))

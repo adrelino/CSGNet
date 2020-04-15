@@ -16,7 +16,7 @@ proportion = 100
 num_epochs = 400
 
 # batch size, based on the GPU memory
-batch_size = 100
+batch_size = 1000
 
 # hidden size of RNN
 hidden_size = 2048
