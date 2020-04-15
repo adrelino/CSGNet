@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 from src.Models.models import ParseModelOutput
 
 from src.utils.train_utils import prepare_input_op, beams_parser, validity, image_from_expressions
+from src.evaluator import Evaluator, show_pair, compute_batch_metrics
+from src.utils import read_config
 
 # Load the terminals symbols of the grammar
 canvas_shape = [64, 64]
@@ -24,3 +26,11 @@ plt.imshow(predicted_images[0], cmap="Greys")
 plt.grid("off")
 plt.axis("off")
 plt.show()
+
+config = read_config.Config("config_synthetic.yml")
+config.batch_size = len(predicted_images)
+evaluator = Evaluator(config)
+pred_images, expressions2 = evaluator.test2(predicted_images, parser, max_len)
+
+cd, iou, cos = compute_batch_metrics(predicted_images, pred_images)
+show_pair(predicted_images, pred_images, expressions, expressions2, cd, iou, cos, (lambda cd,iou,cos,e1, e2 : cd > 0.0))
